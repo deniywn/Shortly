@@ -1,4 +1,4 @@
-namespace Shortly.Client.Models
+namespace Shortly.Client.Data
 {
     public class ErrorViewModel
     {
