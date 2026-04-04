@@ -7,13 +7,13 @@ namespace Shortly.Client.Data
     {
         public static void SeedDefaultData(IApplicationBuilder applicationBuilder)
         {
-            using(var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetService<AppDbContext>();
 
-                if(!dbContext.Users.Any())
+                if (!dbContext.Users.Any())
                 {
-                    dbContext.Users.Add(new User()
+                    dbContext.Users.Add(new AppUser()
                     {
                         FullName = "Ervis Trupja",
                         Email = "ervis@trupja.com"
