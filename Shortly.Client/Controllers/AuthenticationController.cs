@@ -36,13 +36,13 @@ namespace Shortly.Client.Controllers
 
         public async Task<IActionResult> LoginSubmitted(LoginVM loginVM)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return View("Login", loginVM);
             }
 
             var user = await _userManager.FindByEmailAsync(loginVM.EmailAddress);
-            if (user != null)
+            if(user != null)
             {
                 var userPasswordCheck = await _userManager.CheckPasswordAsync(user, loginVM.Password);
                 if (userPasswordCheck)
@@ -52,8 +52,7 @@ namespace Shortly.Client.Controllers
                     if (userLoggedIn.Succeeded)
                     {
                         return RedirectToAction("Index", "Home");
-                    }
-                    else
+                    } else
                     {
                         ModelState.AddModelError("", "Invalid login attempt. Please, check your username and password");
                         return View("Login", loginVM);
@@ -72,12 +71,19 @@ namespace Shortly.Client.Controllers
 
         public async Task<IActionResult> RegisterUser(RegisterVM registerVM)
         {
-            if (!ModelState.IsValid)
+            if(!ModelState.IsValid)
             {
                 return View("Register", registerVM);
             }
 
             return RedirectToAction("Index", "Home");
         }
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
     }
 }

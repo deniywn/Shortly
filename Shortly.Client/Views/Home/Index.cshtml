@@ -35,15 +35,16 @@
 <section class="features" id="features">
     <div class="container">
         <div class="url-shorten-feature">
-            <form class="url-shorten-form" id="url-shorten-form"
-                  asp-controller="Home"
-                  asp-action="ShortenUrl">
+            <form class="url-shorten-form" id="url-shorten-form" 
+            asp-controller="Home"
+            asp-action="ShortenUrl">
                 <div>
-                    <input asp-for="Url"
-                           type="text"
-                           class="url-input"
-                           placeholder="Shorten a link here..."
-                           autocomplete="off" />
+                    <input 
+                        asp-for="Url" 
+                        type="text" 
+                        class="url-input"  
+                        placeholder="Shorten a link here..." 
+                        autocomplete="off" />
 
                     <span asp-validation-for="Url" class="text-danger"></span>
                 </div>

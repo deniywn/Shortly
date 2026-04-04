@@ -12,8 +12,8 @@ namespace Shortly.Client.Controllers
     {
         private IUrlsService _urlsService;
         private readonly IMapper _mapper;
-        public UrlController(IUrlsService urlsService, IMapper mapper)
-        {
+        public UrlController(IUrlsService urlsService, IMapper mapper) 
+        { 
             _urlsService = urlsService;
             _mapper = mapper;
         }

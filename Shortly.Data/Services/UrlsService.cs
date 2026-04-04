@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shortly.Data.Services
 {
-    public class UrlsService : IUrlsService
+    public class UrlsService:IUrlsService
     {
         private AppDbContext _context;
         public UrlsService(AppDbContext context)
@@ -39,7 +39,7 @@ namespace Shortly.Data.Services
         public async Task<Url> UpdateAsync(int id, Url url)
         {
             var urlDb = await _context.Urls.FirstOrDefaultAsync(n => n.Id == id);
-            if (urlDb != null)
+            if(urlDb != null)
             {
                 urlDb.OriginalLink = url.OriginalLink;
                 urlDb.ShortLink = url.ShortLink;
@@ -55,7 +55,7 @@ namespace Shortly.Data.Services
         {
             var urlDb = await _context.Urls.FirstOrDefaultAsync(n => n.Id == id);
 
-            if (urlDb != null)
+            if( urlDb != null)
             {
                 _context.Remove(urlDb);
                 await _context.SaveChangesAsync();

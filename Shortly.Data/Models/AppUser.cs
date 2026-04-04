@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shortly.Data.Models
 {
-    public class AppUser : IdentityUser
+    public class AppUser:IdentityUser
     {
         public AppUser()
         {

@@ -5,9 +5,9 @@
 }
 
 <div class="container">
-    <a class="btn btn-outline-success"
-       asp-controller="Home"
-       asp-action="Index">
+    <a  class="btn btn-outline-success"
+        asp-controller="Home"
+        asp-action="Index">
         Add New
     </a>
 </div>
@@ -26,7 +26,7 @@
         </thead>
         <tbody>
 
-            @foreach (var url in Model)
+            @foreach(var url in Model)
             {
                 <tr>
                     <td>@url.Id</td>
@@ -35,10 +35,10 @@
                     <td>@url.NrOfClicks</td>
                     <td>@(url.User != null ? url.User.FullName : "-")</td>
                     <td>
-                        <a class="btn btn-outline-danger"
-                           asp-controller="Url"
-                           asp-action="Remove"
-                           asp-route-id="@url.Id">
+                        <a class="btn btn-outline-danger" 
+                        asp-controller="Url" 
+                        asp-action="Remove"
+                        asp-route-id="@url.Id">
                             Remove
                         </a>
                     </td>

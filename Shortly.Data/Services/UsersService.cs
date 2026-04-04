@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shortly.Data.Services
 {
-    public class UsersService : IUsersService
+    public class UsersService:IUsersService
     {
         private AppDbContext _context;
         public UsersService(AppDbContext context)

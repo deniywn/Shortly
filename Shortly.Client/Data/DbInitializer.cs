@@ -21,7 +21,7 @@ namespace Shortly.Client.Data
                 if (!await roleManager.RoleExistsAsync(simpleUserRole))
                     await roleManager.CreateAsync(new IdentityRole() { Name = simpleUserRole });
 
-                if (await userManager.FindByEmailAsync(simpleUserEmail) == null)
+                if(await userManager.FindByEmailAsync(simpleUserEmail) == null)
                 {
                     var simpleUser = new AppUser()
                     {
