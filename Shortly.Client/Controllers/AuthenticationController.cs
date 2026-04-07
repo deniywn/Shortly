@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using brevo_csharp.Api;
+using brevo_csharp.Client;
+using brevo_csharp.Model;
 using Shortly.Client.Data.ViewModels;
 using Shortly.Client.Helpers.Roles;
 using Shortly.Data;
 using Shortly.Data.Models;
 using Shortly.Data.Services;
+using System.Net.Mail;
 
 namespace Shortly.Client.Controllers
 {
@@ -14,14 +18,17 @@ namespace Shortly.Client.Controllers
         private IUsersService _usersService;
         private SignInManager<AppUser> _signInManager;
         private UserManager<AppUser> _userManager;
+        private IConfiguration _configuration;
 
         public AuthenticationController(IUsersService usersService,
             SignInManager<AppUser> signInManager,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            IConfiguration configuration)
         {
             _usersService = usersService;
             _signInManager = signInManager;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Users()
@@ -54,6 +61,11 @@ namespace Shortly.Client.Controllers
                     {
                         return RedirectToAction("Index", "Home");
                     }
+                    else if (userLoggedIn.IsNotAllowed)
+                    {
+                        return RedirectToAction("EmailConfirmation");
+                    }
+
                     else
                     {
                         ModelState.AddModelError("", "Invalid login attempt. Please, check your username and password");
@@ -134,5 +146,76 @@ namespace Shortly.Client.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+
+        public async Task<IActionResult> EmailConfirmation()
+        {
+            var confirmEmail = new ConfirmEmailLoginVM();
+            return View(confirmEmail);
+        }
+
+        public async Task<IActionResult> SendEmailConfirmation(ConfirmEmailLoginVM confirmEmailLoginVM)
+        {
+            //1. check if the user exists
+            var user = await _userManager.FindByEmailAsync(confirmEmailLoginVM.EmailAddress);
+
+            //2. create confirmation link
+            if (user != null)
+            {
+                var userToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var userConfirmationLink = Url.Action("EmailConfirmationVerified", "Authentication", new { userId = user.Id, userConfirmationToken = userToken }, Request.Scheme);
+
+                // --- KONFIGURASI BREVO ---
+                var apiKey = _configuration["Brevo:ShortlyKey"]; // Pastikan key di appsettings.json sudah sesuai
+                brevo_csharp.Client.Configuration.Default.ApiKey["api-key"] = apiKey;
+
+                var apiInstance = new TransactionalEmailsApi();
+
+                // Setup Pengirim
+                string fromEmail = _configuration["Brevo:FromAddress"];
+                string fromName = "Shortly Client App";
+                SendSmtpEmailSender sender = new SendSmtpEmailSender(fromName, fromEmail);
+
+                // Setup Penerima
+                SendSmtpEmailTo receiver = new SendSmtpEmailTo(confirmEmailLoginVM.EmailAddress);
+                List<SendSmtpEmailTo> toList = new List<SendSmtpEmailTo> { receiver };
+
+                // Konten Email
+                string emailSubject = "[Shortly] Verify your account";
+                string emailContentTxt = $"Hello from Shortly App. Please, click this link to verify your account: {userConfirmationLink}";
+                string emailContentHtml = $"Hello from Shortly App. Please, click this link to verify your account: <a href='{userConfirmationLink}'>Verify your account</a>";
+                // Catatan: Biasanya userToken dikirim sebagai link, silakan sesuaikan formatnya.
+
+                try
+                {
+                    var sendSmtpEmail = new SendSmtpEmail(sender, toList, null, null, emailContentHtml, null, emailSubject);
+                    await apiInstance.SendTransacEmailAsync(sendSmtpEmail);
+
+                    TempData["EmailConfirmation"] = "Thank you! Please, check your email to verify your account";
+                    return RedirectToAction("Index", "Home");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Gagal mengirim email: {ex.Message}");
+                    return View("EmailConfirmation", confirmEmailLoginVM);
+                }
+            }
+
+            ModelState.AddModelError("", $"Email address {confirmEmailLoginVM.EmailAddress} does not exist");
+            return View("EmailConfirmation", confirmEmailLoginVM);
+        }
+        public async Task<IActionResult> EmailConfirmationVerified(string userId, string userConfirmationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, userConfirmationToken);
+
+            TempData["EmailConfirmationVerified"] = "Thank you! Your account has been confirmed. You can now log in!";
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
